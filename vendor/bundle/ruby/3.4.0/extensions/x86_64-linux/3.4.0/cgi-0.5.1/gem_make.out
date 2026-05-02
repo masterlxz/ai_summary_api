@@ -1,0 +1,18 @@
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/cgi-0.5.1/ext/cgi/escape
+/usr/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-wtx6ke sitelibdir\=./.gem.20260502-8222-wtx6ke clean
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-wtx6ke sitelibdir\=./.gem.20260502-8222-wtx6ke
+compiling escape.c
+linking shared-object cgi/escape.so
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-wtx6ke sitelibdir\=./.gem.20260502-8222-wtx6ke install
+/usr/bin/install -c -m 0755 escape.so ./.gem.20260502-8222-wtx6ke/cgi
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/cgi-0.5.1/ext/cgi/escape
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-wtx6ke sitelibdir\=./.gem.20260502-8222-wtx6ke clean

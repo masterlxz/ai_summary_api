@@ -1,0 +1,25 @@
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/bcrypt-3.1.22/ext/mri
+/usr/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/bcrypt-3.1.22/ext/mri
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-p8u46k sitelibdir\=./.gem.20260502-8222-p8u46k clean
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/bcrypt-3.1.22/ext/mri
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-p8u46k sitelibdir\=./.gem.20260502-8222-p8u46k
+compiling bcrypt_ext.c
+compiling crypt_blowfish.c
+gcc  -D__SKIP_GNU     -c -o x86.o x86.S
+compiling crypt_gensalt.c
+compiling wrapper.c
+wrapper.c:182:60: warning: ‘struct crypt_data’ declared inside parameter list will not be visible outside of this definition or declaration
+  182 | char *crypt_r(const char *key, const char *setting, struct crypt_data *data)
+      |                                                            ^~~~~~~~~~
+linking shared-object bcrypt_ext.so
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/bcrypt-3.1.22/ext/mri
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-p8u46k sitelibdir\=./.gem.20260502-8222-p8u46k install
+/usr/bin/install -c -m 0755 bcrypt_ext.so ./.gem.20260502-8222-p8u46k
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/bcrypt-3.1.22/ext/mri
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-p8u46k sitelibdir\=./.gem.20260502-8222-p8u46k clean

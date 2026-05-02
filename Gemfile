@@ -42,5 +42,6 @@ end
 
 gem 'devise'
 
-gem 'ruby-openai'
 gem 'dotenv-rails', groups: [:development, :test]
+
+gem 'rack-cors'

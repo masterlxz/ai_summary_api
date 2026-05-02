@@ -1,0 +1,19 @@
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/stringio-3.2.0/ext/stringio
+/usr/bin/ruby extconf.rb
+checking for rb_io_mode_t in ruby/io.h... no
+creating Makefile
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/stringio-3.2.0/ext/stringio
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-qsj5kk sitelibdir\=./.gem.20260502-8222-qsj5kk clean
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/stringio-3.2.0/ext/stringio
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-qsj5kk sitelibdir\=./.gem.20260502-8222-qsj5kk
+compiling stringio.c
+linking shared-object stringio.so
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/stringio-3.2.0/ext/stringio
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-qsj5kk sitelibdir\=./.gem.20260502-8222-qsj5kk install
+/usr/bin/install -c -m 0755 stringio.so ./.gem.20260502-8222-qsj5kk
+
+current directory: /home/masterlxz/Documents/workspace/ai_summary_api/vendor/bundle/ruby/3.4.0/gems/stringio-3.2.0/ext/stringio
+make DESTDIR\= sitearchdir\=./.gem.20260502-8222-qsj5kk sitelibdir\=./.gem.20260502-8222-qsj5kk clean

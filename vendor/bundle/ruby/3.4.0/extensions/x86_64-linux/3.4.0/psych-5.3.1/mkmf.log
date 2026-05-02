@@ -1,0 +1,41 @@
+pkg_config: checking for pkg-config for yaml-0.1... -------------------- [" ", "", "-lyaml"]
+
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 pkg-config --exists yaml-0.1
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 pkg-config --libs yaml-0.1 |
+=> "-lyaml\n"
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 "gcc -o conftest -I/usr/include/ruby-3.4.0/x86_64-linux -I/usr/include/ruby-3.4.0/ruby/backward -I/usr/include/ruby-3.4.0 -I.    -march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions         -Wp,-D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security         -fstack-clash-protection -fcf-protection         -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -g -ffile-prefix-map=/build/ruby/src=/usr/src/debug/ruby -flto=auto -fPIC conftest.c -L. -L/usr/lib -L. -Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now          -Wl,-z,pack-relative-relocs -flto=auto -fstack-protector-strong -rdynamic -Wl,-export-dynamic -Wl,--no-as-needed     -lruby  -lm -lpthread  -lc"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main(int argc, char **argv)
+4: {
+5:   return !!argv[argc];
+6: }
+/* end */
+
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 "gcc -o conftest -I/usr/include/ruby-3.4.0/x86_64-linux -I/usr/include/ruby-3.4.0/ruby/backward -I/usr/include/ruby-3.4.0 -I.    -march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions         -Wp,-D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security         -fstack-clash-protection -fcf-protection         -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -g -ffile-prefix-map=/build/ruby/src=/usr/src/debug/ruby -flto=auto -fPIC conftest.c -L. -L/usr/lib -L. -Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now          -Wl,-z,pack-relative-relocs -flto=auto -fstack-protector-strong -rdynamic -Wl,-export-dynamic -Wl,--no-as-needed -lyaml    -lruby  -lm -lpthread  -lc"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main(int argc, char **argv)
+4: {
+5:   return !!argv[argc];
+6: }
+/* end */
+
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 pkg-config --cflags-only-I yaml-0.1 |
+=> "\n"
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 pkg-config --cflags-only-other yaml-0.1 |
+=> "\n"
+LD_LIBRARY_PATH=.:/usr/lib ASAN_OPTIONS=detect_leaks=0 pkg-config --libs-only-l yaml-0.1 |
+=> "-lyaml\n"
+package configuration for yaml-0.1
+incflags: 
+cflags: 
+ldflags: 
+libs: -lyaml
+
+--------------------
+

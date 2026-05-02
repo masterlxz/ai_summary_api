@@ -13,23 +13,30 @@ class SummaryService
         api_key = ENV['GEMINI_API_KEY']
         
         # 1. O endereço oficial dos servidores do Google
-        url = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=#{api_key}")
+    url = URI("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=#{api_key}")
 
-        # 2. Preparando a nossa conexão de internet (como se fosse o carteiro)
-        http = Net::HTTP.new(url.host, url.port)
-        http.use_ssl = true # Ativa o cadeado de segurança (HTTPS)
+    # 2. Preparando a nossa conexão de internet
+    http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = true
 
-        request = Net::HTTP::Post.new(url)
-        
-        # 3. O "Pacote" no exato formato alienígena que o Google exige
-        request.body = {
-        contents: [{
-            parts: [{ text: "INSTRUÇÃO:\n#{prompt}\n\nTEXTO PARA PROCESSAR:\n#{@text}" }]
-        }]
-        }.to_json
+    # 3. COLANDO A ETIQUETA DIRETO NA CRIAÇÃO DA CARTA (A correção está aqui!)
+    request = Net::HTTP::Post.new(url.request_uri, { "Content-Type" => "application/json" })
+    
+    # 4. O Pacote JSON
+    request.body = {
+      contents: [{
+        parts: [{ text: "INSTRUÇÃO:\n#{prompt}\n\nTEXTO PARA PROCESSAR:\n#{@text}" }]
+      }]
+    }.to_json
 
-        # 4. Enviando a carta e esperando o Google responder
-        response = http.request(request)
+    # 5. Enviando a carta e esperando o Google responder
+    response = http.request(request)
+
+        # --- ADICIONE ESTAS 3 LINHAS AQUI ---
+        puts "====== RESPOSTA DO GOOGLE ======"
+        puts response.body
+        puts "================================"
+        # ------------------------------------
         
         # 5. Transformando a resposta de volta em algo que o Ruby entende
         data = JSON.parse(response.body)
