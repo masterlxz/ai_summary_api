@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Summarizer",
+  "version": "1.0",
+  "description": "Resume o conteúdo da página atual usando Gemini e Rails.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
