@@ -1,19 +1,33 @@
-// 1. Ouvinte de evento: Espera o usuário clicar no botão de "Resumir"
+function markdownToHtml(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^# (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^\* (.+)$/gm, '<li>$1</li>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^(.+)$/, '<p>$1</p>');
+}
+
 document.getElementById('summarizeBtn').addEventListener('click', async () => {
   const resultDiv = document.getElementById('result');
-  resultDiv.innerText = 'Processando...';
+  const btn = document.getElementById('summarizeBtn');
 
-  // 2. Pegar a aba ativa do navegador
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analisando...';
+  resultDiv.style.display = 'none';
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-  // 3. Executar um script na aba ativa para ler o texto da página
-  // O 'chrome.scripting.executeScript' é como o "braço" da extensão que toca no DOM da página
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    func: () => document.body.innerText, // Pega todo o texto do corpo da página
+    func: () => document.body.innerText,
   });
 
-  // 4. Enviar esse texto para o nosso servidor Rails (a nossa "Cozinha")
   try {
     const response = await fetch('http://localhost:3000/api/summarize', {
       method: 'POST',
@@ -23,10 +37,20 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
 
     const data = await response.json();
 
-    // 5. Exibir o resultado na nossa janelinha
-    resultDiv.innerText = data.summary || 'Erro ao resumir.';
+    if (!response.ok) {
+      resultDiv.innerHTML = `<span class="error">Erro: ${data.error || 'Falha ao gerar resumo.'}</span>`;
+      resultDiv.style.display = 'block';
+      return;
+    }
+
+    resultDiv.innerHTML = markdownToHtml(data.summary);
+    resultDiv.style.display = 'block';
   } catch (error) {
-    resultDiv.innerText = 'Erro: Não consegui conectar ao servidor.';
+    resultDiv.innerHTML = '<span class="error">Erro: Não consegui conectar ao servidor.</span>';
+    resultDiv.style.display = 'block';
     console.error(error);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Resumir Página Atual';
   }
 });

@@ -1,18 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <title>Resumo AI</title>
   <style>
-    body { width: 300px; padding: 10px; font-family: sans-serif; }
-    button { width: 100%; padding: 10px; background-color: #4285f4; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #357ae8; }
-    #result { margin-top: 10px; font-size: 14px; color: #333; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .container {
+      width: 340px;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      box-sizing: border-box;
+    }
+
+    .header { text-align: center; margin-bottom: 16px; }
+    .header h2 { margin: 0; font-size: 18px; color: #1e293b; }
+
+    button {
+      width: 100%; padding: 12px; background-color: #3b82f6; color: white;
+      border: none; cursor: pointer; border-radius: 8px; font-size: 15px;
+      font-weight: 500; transition: background-color 0.2s ease;
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    button:hover { background-color: #2563eb; }
+    button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+    #result {
+      margin-top: 16px; font-size: 14px; line-height: 1.6; background: white;
+      padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    #result h3, #result h4 { margin: 12px 0 8px; font-size: 15px; color: #0f172a; }
+    #result ul { margin: 8px 0; padding-left: 20px; }
+    #result li { margin: 4px 0; }
+    #result p { margin: 8px 0; }
+    #result strong { color: #1e293b; }
+    .error { color: #ef4444; font-weight: 500; }
+
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid #ffffff;
+      border-bottom-color: transparent; border-radius: 50%; display: inline-block;
+      box-sizing: border-box; animation: rotation 1s linear infinite;
+    }
+    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <h3>Gemini Summarizer</h3>
-  <button id="summarizeBtn">Resumir esta página</button>
-  <div id="result"></div>
+  <div class="container">
+    <div class="header"><h2>✨ Resumo AI</h2></div>
+    <button id="summarizeBtn">Resumir Página Atual</button>
+    <div id="result"></div>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>
