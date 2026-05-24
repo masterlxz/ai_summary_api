@@ -64,36 +64,33 @@ Usuário clica → Extensão extrai o texto da página
 → Extensão converte para HTML e exibe no popup
 ```
 
-### O que foi construído na sessão de 2026-05-24 (autenticação — em progresso)
+### O que foi construído na sessão de 2026-05-24 (autenticação — CONCLUÍDO)
 
-A estrutura de autenticação foi criada mas **ainda não está funcionando** — o fluxo OAuth precisa ser finalizado na próxima sessão.
+O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 
-**Backend (pronto):**
+**Backend:**
 - Migration `20260524184433`: adicionou `google_uid`, `auth_token` e `name` à tabela `users`, com índices únicos.
-- `User` model: método `find_or_create_from_google` e `generate_auth_token!` implementados.
-- `Api::AuthController` (`app/controllers/api/auth_controller.rb`): endpoint `POST /api/auth/google` que verifica o token com a API `oauth2/v2/userinfo` do Google, encontra/cria o usuário e devolve nosso token de sessão.
-- Rota `POST /api/auth/google` registrada em `config/routes.rb`.
+- `User` model: métodos `find_or_create_from_google` e `generate_auth_token!` implementados.
+- `Api::AuthController` (`app/controllers/api/auth_controller.rb`): recebe `code` + `code_verifier` + `redirect_uri`, troca o código pelo access token do Google via `oauth2.googleapis.com/token`, busca dados do usuário via `oauth2/v2/userinfo`, encontra/cria o usuário e devolve nosso token de sessão.
+- Rota: `post 'auth/google', to: 'auth#google'` dentro do `namespace :api`.
+- Variáveis de ambiente: `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` no `.env`.
 
-**Extensão (pronto):**
-- `manifest.json`: permissões `identity` e `storage` adicionadas; bloco `oauth2` com Client ID e escopos configurados.
-- `login.html` e `login.js`: tela de login com botão "Entrar com Google".
+**Extensão:**
+- `manifest.json`: permissões `identity` e `storage`; service worker `background.js` registrado. Sem bloco `oauth2`.
+- `background.js`: service worker que gerencia todo o fluxo OAuth (PKCE + launchWebAuthFlow + fetch para Rails + storage.set). Responde à mensagem `START_LOGIN`.
+- `login.js`: apenas envia `{ type: 'START_LOGIN' }` ao service worker e aguarda resposta.
 - `popup.js`: verifica token ao abrir; envia `Authorization: Bearer <token>` nas requisições; redireciona para login se token inválido.
-- `popup.html`: elemento `#greeting` para saudação personalizada.
 
-**O que falta para a autenticação funcionar:**
-- A abordagem `chrome.identity.getAuthToken()` falhou com `Error 400: invalid_request` (instável para extensões não publicadas na Chrome Web Store).
-- A solução é mudar para `chrome.identity.launchWebAuthFlow()` com PKCE, usando uma credencial do tipo **"Aplicativo da Web"** no Google Cloud Console.
-- **Próximos passos concretos:**
-  1. Criar nova credencial OAuth tipo "Aplicativo da Web" no GCP com redirect URI `https://eidppmgladbnonfacjlabffbgbkeegfk.chromiumapp.org/`
-  2. Copiar Client ID e Client Secret → salvar secret no `.env` do Rails
-  3. Atualizar `manifest.json`: remover bloco `oauth2`, adicionar novo Client ID
-  4. Reescrever `login.js` para usar `launchWebAuthFlow()` com PKCE
-  5. Atualizar `Api::AuthController` para receber código de autorização e trocá-lo pelo token do Google
+**Decisões técnicas importantes:**
+- `chrome.identity.getAuthToken()` foi descartado — só funciona com extensões publicadas na Web Store.
+- `launchWebAuthFlow()` com PKCE foi a solução — funciona em desenvolvimento.
+- A lógica de auth foi movida para o **service worker** (`background.js`) porque o popup fecha quando perde foco (enquanto o Google auth window está aberto), matando o contexto JS antes do `chrome.storage.local.set` ser executado.
+- Credencial OAuth usada: tipo **"Aplicativo da Web"** no GCP (tem client_id + client_secret).
+- Extension ID: `eidppmgladbnonfacjlabffbgbkeegfk`
 
-**Google Cloud Console configurado:**
+**Google Cloud Console:**
 - Projeto criado, tela de consentimento configurada (modo Externo), usuário de teste `fabio.anjos.junior@gmail.com` adicionado.
-- Credencial "Extensão do Chrome" existente (Client ID: `91148707774-hucvtf52i8t66mo79n3l6jke8981178l.apps.googleusercontent.com`) — pode ser descartada em favor da nova "Aplicativo da Web".
-- Extension ID da extensão carregada no Chrome: `eidppmgladbnonfacjlabffbgbkeegfk`
+- Credencial "Aplicativo da Web" com redirect URI `https://eidppmgladbnonfacjlabffbgbkeegfk.chromiumapp.org/`.
 
 ### Infraestrutura de banco
 
@@ -103,7 +100,6 @@ A estrutura de autenticação foi criada mas **ainda não está funcionando** �
 
 ### O que não funciona ainda
 
-- Autenticação Google na extensão — em progresso (ver acima).
 - Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
 - Não há chat após o resumo.
 - Só suporta Gemini — sem multi-provider.
@@ -114,7 +110,7 @@ A estrutura de autenticação foi criada mas **ainda não está funcionando** �
 
 > **Nota:** O roadmap foi revisado em 2026-05-24. A ordem e o escopo mudaram em relação à versão anterior.
 
-### Fase 1 — Autenticação (EM PROGRESSO — ver seção "O Presente")
+### Fase 1 — Autenticação (CONCLUÍDA)
 Fundação obrigatória para tudo que vem depois.
 - Rotas de registro/login via API JSON (Devise já instalado).
 - Autenticação por **token** no header `Authorization: Bearer <token>`.

@@ -12,12 +12,8 @@
   "host_permissions": [
     "http://localhost:3000/*"
   ],
-  "oauth2": {
-    "client_id": "91148707774-hucvtf52i8t66mo79n3l6jke8981178l.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/userinfo.profile"
-    ]
+  "background": {
+    "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html"

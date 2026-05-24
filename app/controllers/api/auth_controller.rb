@@ -4,14 +4,23 @@ require 'json'
 
 class Api::AuthController < ApplicationController
   def google
-    token = params[:token]
+    code         = params[:code]
+    code_verifier = params[:code_verifier]
+    redirect_uri  = params[:redirect_uri]
 
-    if token.blank?
-      render json: { error: "Token não enviado" }, status: :bad_request
+    if code.blank? || code_verifier.blank? || redirect_uri.blank?
+      render json: { error: "Parâmetros incompletos" }, status: :bad_request
       return
     end
 
-    google_info = fetch_google_user_info(token)
+    access_token = exchange_code_for_token(code, code_verifier, redirect_uri)
+
+    if access_token.nil?
+      render json: { error: "Falha ao trocar o código pelo token" }, status: :unauthorized
+      return
+    end
+
+    google_info = fetch_google_user_info(access_token)
 
     if google_info.nil?
       render json: { error: "Token do Google inválido" }, status: :unauthorized
@@ -28,13 +37,35 @@ class Api::AuthController < ApplicationController
 
   private
 
-  def fetch_google_user_info(token)
-    url = URI("https://www.googleapis.com/oauth2/v2/userinfo")
+  def exchange_code_for_token(code, code_verifier, redirect_uri)
+    url  = URI("https://oauth2.googleapis.com/token")
+    http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Post.new(url.request_uri)
+    request["Content-Type"] = "application/x-www-form-urlencoded"
+    request.body = URI.encode_www_form(
+      code:          code,
+      code_verifier: code_verifier,
+      client_id:     ENV["GOOGLE_CLIENT_ID"],
+      client_secret: ENV["GOOGLE_CLIENT_SECRET"],
+      redirect_uri:  redirect_uri,
+      grant_type:    "authorization_code"
+    )
+
+    response = http.request(request)
+    return nil unless response.is_a?(Net::HTTPSuccess)
+
+    JSON.parse(response.body)["access_token"]
+  end
+
+  def fetch_google_user_info(access_token)
+    url  = URI("https://www.googleapis.com/oauth2/v2/userinfo")
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
 
     request = Net::HTTP::Get.new(url.request_uri)
-    request["Authorization"] = "Bearer #{token}"
+    request["Authorization"] = "Bearer #{access_token}"
 
     response = http.request(request)
     return nil unless response.is_a?(Net::HTTPSuccess)

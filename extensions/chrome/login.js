@@ -7,39 +7,13 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   statusDiv.className = '';
 
   try {
-    // Passo 1: pedir o token do Google via Chrome
-    const googleToken = await new Promise((resolve, reject) => {
-      chrome.identity.getAuthToken({ interactive: true }, (token) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(token);
-        }
-      });
-    });
+    const result = await chrome.runtime.sendMessage({ type: 'START_LOGIN' });
 
-    // Passo 2: enviar o token do Google para o Rails verificar
-    const response = await fetch('http://localhost:3000/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: googleToken })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Falha na autenticação');
+    if (!result.success) {
+      throw new Error(result.error);
     }
 
-    // Passo 3: salvar nosso token de sessão e o nome do usuário
-    await chrome.storage.local.set({
-      authToken: data.token,
-      userName:  data.name
-    });
-
-    // Passo 4: ir para a tela principal
     window.location.href = 'popup.html';
-
   } catch (error) {
     statusDiv.textContent = `Erro: ${error.message}`;
     statusDiv.className = 'error';
