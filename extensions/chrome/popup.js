@@ -13,9 +13,31 @@ function markdownToHtml(text) {
     .replace(/^(.+)$/, '<p>$1</p>');
 }
 
+// Guarda na entrada: verifica login ao abrir o popup
+document.addEventListener('DOMContentLoaded', async () => {
+  const { authToken, userName } = await chrome.storage.local.get(['authToken', 'userName']);
+
+  if (!authToken) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  if (userName) {
+    const greeting = document.getElementById('greeting');
+    if (greeting) greeting.textContent = `Olá, ${userName.split(' ')[0]}`;
+  }
+});
+
 document.getElementById('summarizeBtn').addEventListener('click', async () => {
   const resultDiv = document.getElementById('result');
   const btn = document.getElementById('summarizeBtn');
+
+  const { authToken } = await chrome.storage.local.get('authToken');
+
+  if (!authToken) {
+    window.location.href = 'login.html';
+    return;
+  }
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Analisando...';
@@ -31,9 +53,18 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
   try {
     const response = await fetch('http://localhost:3000/api/summarize', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
       body: JSON.stringify({ text: result })
     });
+
+    if (response.status === 401) {
+      await chrome.storage.local.remove(['authToken', 'userName']);
+      window.location.href = 'login.html';
+      return;
+    }
 
     const data = await response.json();
 

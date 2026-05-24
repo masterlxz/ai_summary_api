@@ -2,6 +2,8 @@
 
 > Este arquivo é um "Save State" técnico e histórico do projeto. Ele existe para que, ao trocar de máquina ou retomar o trabalho após uma pausa, você (ou uma IA assistente) possa ler este documento e entrar em contexto imediatamente, sem precisar re-explorar o código do zero.
 
+> Lembre-se sempre de ir atualizando esse arquivo conforme progredimos no projeto.
+
 ---
 
 ## 🎯 O OBJETIVO DO PROJETO
@@ -62,27 +64,90 @@ Usuário clica → Extensão extrai o texto da página
 → Extensão converte para HTML e exibe no popup
 ```
 
-O design da extensão foi atualizado e está com visual de SaaS profissional: estilo card moderno, fonte Inter, spinner de carregamento, bordas arredondadas no corpo da extensão.
+### O que foi construído na sessão de 2026-05-24 (autenticação — em progresso)
+
+A estrutura de autenticação foi criada mas **ainda não está funcionando** — o fluxo OAuth precisa ser finalizado na próxima sessão.
+
+**Backend (pronto):**
+- Migration `20260524184433`: adicionou `google_uid`, `auth_token` e `name` à tabela `users`, com índices únicos.
+- `User` model: método `find_or_create_from_google` e `generate_auth_token!` implementados.
+- `Api::AuthController` (`app/controllers/api/auth_controller.rb`): endpoint `POST /api/auth/google` que verifica o token com a API `oauth2/v2/userinfo` do Google, encontra/cria o usuário e devolve nosso token de sessão.
+- Rota `POST /api/auth/google` registrada em `config/routes.rb`.
+
+**Extensão (pronto):**
+- `manifest.json`: permissões `identity` e `storage` adicionadas; bloco `oauth2` com Client ID e escopos configurados.
+- `login.html` e `login.js`: tela de login com botão "Entrar com Google".
+- `popup.js`: verifica token ao abrir; envia `Authorization: Bearer <token>` nas requisições; redireciona para login se token inválido.
+- `popup.html`: elemento `#greeting` para saudação personalizada.
+
+**O que falta para a autenticação funcionar:**
+- A abordagem `chrome.identity.getAuthToken()` falhou com `Error 400: invalid_request` (instável para extensões não publicadas na Chrome Web Store).
+- A solução é mudar para `chrome.identity.launchWebAuthFlow()` com PKCE, usando uma credencial do tipo **"Aplicativo da Web"** no Google Cloud Console.
+- **Próximos passos concretos:**
+  1. Criar nova credencial OAuth tipo "Aplicativo da Web" no GCP com redirect URI `https://eidppmgladbnonfacjlabffbgbkeegfk.chromiumapp.org/`
+  2. Copiar Client ID e Client Secret → salvar secret no `.env` do Rails
+  3. Atualizar `manifest.json`: remover bloco `oauth2`, adicionar novo Client ID
+  4. Reescrever `login.js` para usar `launchWebAuthFlow()` com PKCE
+  5. Atualizar `Api::AuthController` para receber código de autorização e trocá-lo pelo token do Google
+
+**Google Cloud Console configurado:**
+- Projeto criado, tela de consentimento configurada (modo Externo), usuário de teste `fabio.anjos.junior@gmail.com` adicionado.
+- Credencial "Extensão do Chrome" existente (Client ID: `91148707774-hucvtf52i8t66mo79n3l6jke8981178l.apps.googleusercontent.com`) — pode ser descartada em favor da nova "Aplicativo da Web".
+- Extension ID da extensão carregada no Chrome: `eidppmgladbnonfacjlabffbgbkeegfk`
+
+### Infraestrutura de banco
+
+- **Tabela `users`**: `google_uid`, `auth_token`, `name`, `free_summaries_count`, `last_summary_date` — tudo criado.
+- **Tabela `ai_connections`**: `provider`, `api_key`, `user_id` — pronta. Falta adicionar campo `name` (migration futura).
+- **Modelos**: `User` (`has_one :ai_connection`) e `AiConnection` (`belongs_to :user`) existem.
+
+### O que não funciona ainda
+
+- Autenticação Google na extensão — em progresso (ver acima).
+- Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
+- Não há chat após o resumo.
+- Só suporta Gemini — sem multi-provider.
 
 ---
 
 ## 🚀 O FUTURO — Roadmap de Produto
 
-### Funcionalidade 1: Modelo BYOK (Bring Your Own Key)
-Permitir que o usuário use sua própria chave da API do Gemini.
-- Adicionar uma tela de **Configurações** na extensão (uma nova página HTML ou um painel no popup).
-- Salvar a chave no `chrome.storage.sync` (persiste entre dispositivos do mesmo usuário Chrome).
-- Enviar a chave no header ou body do `fetch` para o Rails, que a usará em vez da variável de ambiente global.
+> **Nota:** O roadmap foi revisado em 2026-05-24. A ordem e o escopo mudaram em relação à versão anterior.
 
-### Funcionalidade 2: Autenticação e CRUD
-- Avaliar **Login com Google via OmniAuth** em vez de login tradicional (e-mail/senha) — mais simples de implementar e muito mais amigável na UX de uma extensão.
-- Criar um sistema de **limitação de uso** por usuário (ex: N resumos por dia no plano gratuito).
-- Construir um **CRUD** para que o usuário veja o histórico dos seus resumos.
+### Fase 1 — Autenticação (EM PROGRESSO — ver seção "O Presente")
+Fundação obrigatória para tudo que vem depois.
+- Rotas de registro/login via API JSON (Devise já instalado).
+- Autenticação por **token** no header `Authorization: Bearer <token>`.
+- Tela de login/registro na extensão (nova página HTML).
+- Token salvo no `chrome.storage.local` (apenas local, não sync — por segurança).
 
-### Funcionalidade 3: Planos e Monetização (SaaS)
-- Definir tiers de plano (Gratuito, Pro, etc.).
-- Integrar um gateway de pagamento (ex: Stripe).
-- Criar uma landing page para o produto.
+### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider)
+Usuário cadastra suas próprias chaves de diferentes provedores de IA.
+- CRUD de `ai_connections` com campo **nome** amigável (ex: "Minha chave GPT-4").
+- Suporte a múltiplos provedores: Gemini, OpenAI, outros.
+- Chaves armazenadas **no banco de dados** (não localmente no Chrome).
+- Migration necessária: adicionar campo `name` à tabela `ai_connections`.
+- Usuário seleciona qual conexão usar ao gerar o resumo.
+- `SummaryService` se adapta ao provider selecionado.
+
+### Fase 3 — Chat Pós-Resumo
+Após gerar o resumo, o usuário pode conversar sobre o conteúdo da página.
+- Mini chat integrado no popup da extensão.
+- O contexto da página é mantido como contexto da conversa.
+- Nova tabela `conversations` ou `messages` para persistir o histórico.
+
+### Fase 4 — Persistência de Estado
+Fechar a extensão não perde o resumo nem o chat.
+- Ao reabrir o popup: buscar último estado da sessão via GET autenticado.
+- Resumo e conversa salvos na conta do usuário.
+
+### Fase 5 — Limite de Uso e Histórico
+- Lógica de limitação usando `free_summaries_count` e `last_summary_date` (já no schema).
+- Endpoint `GET /api/summaries` para histórico de resumos.
+
+### Fase 6 — Monetização (SaaS)
+- Planos Gratuito/Pro com Stripe.
+- Landing page do produto.
 
 ---
 
