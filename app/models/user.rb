@@ -2,7 +2,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  has_one :ai_connection
+  has_many :ai_connections
 
   def self.find_or_create_from_google(google_info)
     user = find_by(google_uid: google_info[:google_uid])

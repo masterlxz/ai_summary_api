@@ -95,14 +95,15 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 ### Infraestrutura de banco
 
 - **Tabela `users`**: `google_uid`, `auth_token`, `name`, `free_summaries_count`, `last_summary_date` — tudo criado.
-- **Tabela `ai_connections`**: `provider`, `api_key`, `user_id` — pronta. Falta adicionar campo `name` (migration futura).
-- **Modelos**: `User` (`has_one :ai_connection`) e `AiConnection` (`belongs_to :user`) existem.
+- **Tabela `ai_connections`**: `provider`, `api_key`, `user_id`, `name` — tudo criado (campo `name` adicionado em 2026-05-26).
+- **Modelos**: `User` (`has_many :ai_connections`) e `AiConnection` (`belongs_to :user`) existem.
 
 ### O que não funciona ainda
 
 - Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
 - Não há chat após o resumo.
 - Só suporta Gemini — sem multi-provider.
+- Falta a tela na extensão para gerenciar conexões de IA (Fase 2 frontend).
 
 ---
 
@@ -117,14 +118,15 @@ Fundação obrigatória para tudo que vem depois.
 - Tela de login/registro na extensão (nova página HTML).
 - Token salvo no `chrome.storage.local` (apenas local, não sync — por segurança).
 
-### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider)
+### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider) — BACKEND CONCLUÍDO
 Usuário cadastra suas próprias chaves de diferentes provedores de IA.
-- CRUD de `ai_connections` com campo **nome** amigável (ex: "Minha chave GPT-4").
-- Suporte a múltiplos provedores: Gemini, OpenAI, outros.
-- Chaves armazenadas **no banco de dados** (não localmente no Chrome).
-- Migration necessária: adicionar campo `name` à tabela `ai_connections`.
-- Usuário seleciona qual conexão usar ao gerar o resumo.
-- `SummaryService` se adapta ao provider selecionado.
+- [x] Migration adicionou campo `name` à tabela `ai_connections`
+- [x] `Api::AiConnectionsController` com index, create, update, destroy — protegidos por token
+- [x] `ApplicationController` com `authenticate_user!` e `current_user`
+- [x] `User` migrado de `has_one` para `has_many :ai_connections`
+- [ ] Tela na extensão para listar e cadastrar conexões (PRÓXIMO PASSO)
+- [ ] Usuário seleciona qual conexão usar ao gerar o resumo
+- [ ] `SummaryService` se adapta ao provider selecionado
 
 ### Fase 3 — Chat Pós-Resumo
 Após gerar o resumo, o usuário pode conversar sobre o conteúdo da página.
@@ -173,3 +175,52 @@ Em caso de erros ou bugs, **não dar a correção de bandeja**. O processo corre
 2. Fazer perguntas para ajudar a identificar a causa raiz.
 3. Explicar o que o erro significa conceitualmente.
 4. Só então sugerir a correção, explicando o porquê.
+
+---
+
+## 🧑‍💻 PERFIL DO DESENVOLVEDOR — Para a IA assistente
+
+> Esta seção foi escrita com base em observações das sessões reais. Leia antes de começar qualquer sessão.
+
+### O que ele já domina
+- Lógica de programação geral (condicionais, loops, funções, etc.)
+- Conceitos de Model e Service no Rails — entende que service é a quebra do model para organização
+- Fluxo geral de uma API (request → controller → model → response)
+- JavaScript e a estrutura da extensão do Chrome
+
+### O que ele ainda está aprendendo
+- **Sintaxe Ruby** — esta é a principal lacuna. Ele entende a lógica mas não conhece o idioma.
+  - Símbolos (`:api`, `:index`) — o que é o `:` na frente
+  - Blocos `do...end` — o que são e por que existem
+  - Encadeamento de métodos com `.` (ex: `Rails.application.routes.draw`)
+  - Safe navigation operator `&.`
+  - `self.` em métodos de classe vs métodos de instância
+  - `unless` como alternativa ao `if`
+  - Retorno implícito (última linha do método)
+  - Herança com `<` e o que ela confere à classe filha
+- **Controller** — entendeu na sessão de 2026-05-26, mas é conceito novo
+- **View** — entendeu que em API mode raramente usa arquivo de view separado (`render json:` no controller)
+
+### Como ele aprende melhor
+- Perguntas conceituais curtas no meio da implementação ("o que é X nessa linha?")
+- Prefere entender o código em si, não só a lógica por trás
+- Responde bem quando você explica linha por linha
+- Quando erra, consegue chegar à resposta com uma dica ("olha a linha X do arquivo Y")
+- Exemplo real: ao ver o erro `undefined method 'ai_connections'`, com a dica "olha o has_one no user.rb" ele mesmo concluiu "é por causa que tá no plural?"
+
+### Ritmo da sessão
+- Ele pergunta muito durante a implementação — isso é positivo, não é atraso
+- Às vezes fecha a conversa sem querer e precisa retomar — sempre verifique o estado atual do código antes de assumir onde parou
+- Gosta de commitar ao final de cada etapa coesa, com o README_CONTEXT.md atualizado
+
+### Analogias já estabelecidas (continue usando)
+
+| Conceito Técnico | Analogia |
+|---|---|
+| Controller | Garçom (recebe o pedido e entrega o resultado) |
+| Service | Cozinha (onde o trabalho pesado acontece) |
+| CORS | Segurança na porta do restaurante |
+| `fetch` no JS | Motoboy que leva e traz a encomenda |
+| `routes` | Caderno de endereços |
+| Classe do model | Formulário que representa uma planilha (tabela) no banco |
+| Token de sessão | Crachá de acesso gerado após login |
