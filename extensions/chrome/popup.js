@@ -13,7 +13,6 @@ function markdownToHtml(text) {
     .replace(/^(.+)$/, '<p>$1</p>');
 }
 
-// Guarda na entrada: verifica login ao abrir o popup
 document.addEventListener('DOMContentLoaded', async () => {
   const { authToken, userName } = await chrome.storage.local.get(['authToken', 'userName']);
 
@@ -26,7 +25,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     const greeting = document.getElementById('greeting');
     if (greeting) greeting.textContent = `Olá, ${userName.split(' ')[0]}`;
   }
+
+  await loadConnectionSelect(authToken);
 });
+
+async function loadConnectionSelect(token) {
+  const select = document.getElementById('connectionSelect');
+
+  try {
+    const [connectionsRes, meRes] = await Promise.all([
+      fetch('http://localhost:3000/api/ai_connections', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch('http://localhost:3000/api/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+    ]);
+
+    if (connectionsRes.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const connections = await connectionsRes.json();
+    const me = await meRes.json();
+    const remaining = me.free_summaries_remaining ?? 5;
+
+    select.innerHTML = `<option value="">✨ Gemini Gratuito (${remaining}/5 restantes)</option>`;
+
+    connections.forEach(conn => {
+      const option = document.createElement('option');
+      option.value = conn.id;
+      option.textContent = `${conn.name} (${conn.provider})`;
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    select.innerHTML = '<option value="">✨ Gemini Gratuito</option>';
+    console.error(error);
+  }
+}
 
 document.getElementById('connectionsBtn').addEventListener('click', () => {
   window.location.href = 'connections.html';
@@ -54,6 +92,10 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
     func: () => document.body.innerText,
   });
 
+  const selectedConnectionId = document.getElementById('connectionSelect').value;
+  const body = { text: result };
+  if (selectedConnectionId) body.ai_connection_id = selectedConnectionId;
+
   try {
     const response = await fetch('http://localhost:3000/api/summarize', {
       method: 'POST',
@@ -61,7 +103,7 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authToken}`
       },
-      body: JSON.stringify({ text: result })
+      body: JSON.stringify(body)
     });
 
     if (response.status === 401) {
@@ -80,6 +122,12 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
 
     resultDiv.innerHTML = markdownToHtml(data.summary);
     resultDiv.style.display = 'block';
+
+    if (data.free_summaries_remaining != null) {
+      const select = document.getElementById('connectionSelect');
+      const freeOption = select.querySelector('option[value=""]');
+      if (freeOption) freeOption.textContent = `✨ Gemini Gratuito (${data.free_summaries_remaining}/5 restantes)`;
+    }
   } catch (error) {
     resultDiv.innerHTML = '<span class="error">Erro: Não consegui conectar ao servidor.</span>';
     resultDiv.style.display = 'block';

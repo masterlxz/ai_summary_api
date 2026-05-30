@@ -5,5 +5,7 @@ Rails.application.routes.draw do
         post 'auth/google', to: 'auth#google'
 
         resources :ai_connections, only: [:index, :create, :update, :destroy]
+
+        get 'me', to: 'users#me'
     end
 end

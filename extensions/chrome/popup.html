@@ -55,6 +55,15 @@
     #result strong { color: #1e293b; }
     .error { color: #ef4444; font-weight: 500; }
 
+    select {
+      width: 100%; padding: 9px 10px; margin-bottom: 10px;
+      border: 1px solid #cbd5e1; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      color: #0f172a; background: white; box-sizing: border-box;
+      cursor: pointer;
+    }
+    select:focus { outline: none; border-color: #3b82f6; }
+
     .spinner {
       width: 16px; height: 16px; border: 2px solid #ffffff;
       border-bottom-color: transparent; border-radius: 50%; display: inline-block;
@@ -72,6 +81,9 @@
       </div>
       <button id="connectionsBtn" title="Gerenciar conexões AI">⚙</button>
     </div>
+    <select id="connectionSelect">
+      <option value="">⏳ Carregando conexões...</option>
+    </select>
     <button id="summarizeBtn">Resumir Página Atual</button>
     <div id="result"></div>
   </div>
