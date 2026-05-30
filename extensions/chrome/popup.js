@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+document.getElementById('connectionsBtn').addEventListener('click', () => {
+  window.location.href = 'connections.html';
+});
+
 document.getElementById('summarizeBtn').addEventListener('click', async () => {
   const resultDiv = document.getElementById('result');
   const btn = document.getElementById('summarizeBtn');

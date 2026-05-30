@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conexões AI — Resumo AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .container {
+      width: 340px;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      box-sizing: border-box;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    #backBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #64748b;
+      font-size: 18px;
+      line-height: 1;
+      border-radius: 4px;
+      width: auto;
+    }
+    #backBtn:hover { background-color: #e2e8f0; color: #0f172a; }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      color: #1e293b;
+      flex: 1;
+    }
+
+    /* Lista de conexões */
+    #connectionsList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+      min-height: 20px;
+    }
+
+    .connection-item {
+      background: white;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .connection-info { flex: 1; }
+    .connection-name { font-size: 14px; font-weight: 500; color: #1e293b; }
+    .connection-provider { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      width: auto;
+      line-height: 1;
+    }
+    .delete-btn:hover { background-color: #fee2e2; color: #ef4444; }
+
+    .empty-state {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    /* Formulário de nova conexão */
+    .form-card {
+      background: white;
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .form-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
+    label:first-of-type { margin-top: 0; }
+
+    select, input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+      background: #f8fafc;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+    }
+
+    #saveBtn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.2s ease;
+    }
+    #saveBtn:hover { background-color: #2563eb; }
+    #saveBtn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+    #status {
+      margin-top: 10px;
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+      color: #22c55e;
+    }
+    #status.error { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button id="backBtn" title="Voltar">←</button>
+      <h2>Minhas Conexões AI</h2>
+    </div>
+
+    <div id="connectionsList">
+      <p class="empty-state">Carregando...</p>
+    </div>
+
+    <div class="form-card">
+      <p class="form-title">Nova Conexão</p>
+
+      <label for="providerSelect">Provedor</label>
+      <select id="providerSelect">
+        <option value="gemini">Google Gemini</option>
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic (Claude)</option>
+      </select>
+
+      <label for="nameInput">Nome (para identificar)</label>
+      <input type="text" id="nameInput" placeholder="Ex: Minha chave Gemini">
+
+      <label for="apiKeyInput">API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="Cole sua chave aqui">
+
+      <button id="saveBtn">Salvar Conexão</button>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script src="connections.js"></script>
+</body>
+</html>
