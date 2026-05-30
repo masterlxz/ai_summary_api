@@ -98,12 +98,20 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 - **Tabela `ai_connections`**: `provider`, `api_key`, `user_id`, `name` — tudo criado (campo `name` adicionado em 2026-05-26).
 - **Modelos**: `User` (`has_many :ai_connections`) e `AiConnection` (`belongs_to :user`) existem.
 
+### O que foi construído na sessão de 2026-05-30 (Fase 2 frontend — tela de conexões)
+
+**Extensão:**
+- `connections.html`: tela de gerenciamento de conexões AI — lista conexões cadastradas, formulário para adicionar nova (provider + nome + API key) e botão × para deletar cada uma.
+- `connections.js`: faz GET ao abrir a tela, POST ao salvar e DELETE ao clicar em ×. Todas as requisições enviam `Authorization: Bearer <token>`. Redireciona para `login.html` se receber 401.
+- `popup.html`: adicionado botão ⚙ no header que navega para `connections.html`.
+- `popup.js`: adicionado evento de clique no botão ⚙.
+
 ### O que não funciona ainda
 
 - Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
 - Não há chat após o resumo.
-- Só suporta Gemini — sem multi-provider.
-- Falta a tela na extensão para gerenciar conexões de IA (Fase 2 frontend).
+- Só suporta Gemini — sem multi-provider (próximo passo da Fase 2).
+- Falta o seletor de conexão no popup e a adaptação do SummaryService ao provider.
 
 ---
 
@@ -118,14 +126,14 @@ Fundação obrigatória para tudo que vem depois.
 - Tela de login/registro na extensão (nova página HTML).
 - Token salvo no `chrome.storage.local` (apenas local, não sync — por segurança).
 
-### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider) — BACKEND CONCLUÍDO
+### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider) — EM ANDAMENTO
 Usuário cadastra suas próprias chaves de diferentes provedores de IA.
 - [x] Migration adicionou campo `name` à tabela `ai_connections`
 - [x] `Api::AiConnectionsController` com index, create, update, destroy — protegidos por token
 - [x] `ApplicationController` com `authenticate_user!` e `current_user`
 - [x] `User` migrado de `has_one` para `has_many :ai_connections`
-- [ ] Tela na extensão para listar e cadastrar conexões (PRÓXIMO PASSO)
-- [ ] Usuário seleciona qual conexão usar ao gerar o resumo
+- [x] Tela na extensão para listar e cadastrar conexões (`connections.html` + `connections.js`)
+- [ ] Usuário seleciona qual conexão usar ao gerar o resumo (PRÓXIMO PASSO)
 - [ ] `SummaryService` se adapta ao provider selecionado
 
 ### Fase 3 — Chat Pós-Resumo
