@@ -110,8 +110,9 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 
 - Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
 - Não há chat após o resumo.
-- Só suporta Gemini — sem multi-provider (próximo passo da Fase 2).
-- Falta o seletor de conexão no popup e a adaptação do SummaryService ao provider.
+- Ao fechar e reabrir a extensão, o resumo some — estado não persiste (Fase 4).
+- Não há chat após o resumo (Fase 3).
+- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 4).
 
 ---
 
@@ -126,15 +127,17 @@ Fundação obrigatória para tudo que vem depois.
 - Tela de login/registro na extensão (nova página HTML).
 - Token salvo no `chrome.storage.local` (apenas local, não sync — por segurança).
 
-### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider) — EM ANDAMENTO
+### Fase 2 — Gerenciamento de Conexões AI (BYOK Multi-Provider) — CONCLUÍDA
 Usuário cadastra suas próprias chaves de diferentes provedores de IA.
 - [x] Migration adicionou campo `name` à tabela `ai_connections`
 - [x] `Api::AiConnectionsController` com index, create, update, destroy — protegidos por token
 - [x] `ApplicationController` com `authenticate_user!` e `current_user`
 - [x] `User` migrado de `has_one` para `has_many :ai_connections`
 - [x] Tela na extensão para listar e cadastrar conexões (`connections.html` + `connections.js`)
-- [ ] Usuário seleciona qual conexão usar ao gerar o resumo (PRÓXIMO PASSO)
-- [ ] `SummaryService` se adapta ao provider selecionado
+- [x] Select de conexões no popup com contagem de usos gratuitos em tempo real
+- [x] `SummariesController` com autenticação, limite de 5 resumos gratuitos/dia e roteamento por `ai_connection_id`
+- [x] `SummaryService` suporta Gemini, OpenAI e Anthropic
+- [x] `GET /api/me` retorna saldo gratuito restante (`Api::UsersController`)
 
 ### Fase 3 — Chat Pós-Resumo
 Após gerar o resumo, o usuário pode conversar sobre o conteúdo da página.
