@@ -106,13 +106,27 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 - `popup.html`: adicionado botão ⚙ no header que navega para `connections.html`.
 - `popup.js`: adicionado evento de clique no botão ⚙.
 
+### O que foi construído na sessão de 2026-05-31 (Fase 3 — Chat Pós-Resumo)
+
+**Backend:**
+- `app/services/chat_service.rb`: novo serviço de chat stateless — recebe `message`, `page_context` e `history` (array de turns anteriores), monta o contexto correto para cada provider (Gemini, OpenAI, Anthropic) e retorna a resposta da IA.
+- `app/controllers/api/chat_controller.rb`: novo controller com `POST /api/chat` — autenticado por token, resolve credenciais (conexão própria ou Gemini gratuito), chama o `ChatService`.
+- `config/routes.rb`: adicionada rota `post 'chat', to: 'chat#create'`.
+
+**Extensão:**
+- `popup.html`: adicionada seção `#chat-section` (oculta inicialmente) com área de mensagens `#chat-messages`, input e botão de enviar. CSS com bolhas `.chat-bubble.user` (azul, direita) e `.chat-bubble.assistant` (branca, esquerda).
+- `popup.js`: variáveis globais `chatHistory`, `currentPageText`, `currentConnectionId` guardam estado em memória. Após resumo gerado, `#chat-section` aparece. Função `sendChatMessage()` manda POST com histórico completo, exibe bolhas e atualiza `chatHistory`. Enter no input também envia.
+
+**Decisões técnicas:**
+- Chat é stateless por enquanto: histórico vive só em memória JS, some ao fechar o popup. Persistência fica para a Fase 4.
+- Gemini não tem campo `system` — contexto da página é injetado como o primeiro "turn" do array `contents`, com resposta simulada "Entendido" para satisfazer a API.
+- Chat não consome o limite gratuito de resumos — usa a mesma conexão selecionada sem cobrança adicional por mensagem.
+
 ### O que não funciona ainda
 
-- Ao fechar e reabrir a extensão, o resumo some — estado não persiste.
-- Não há chat após o resumo.
 - Ao fechar e reabrir a extensão, o resumo some — estado não persiste (Fase 4).
-- Não há chat após o resumo (Fase 3).
-- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 4).
+- Histórico de chat some ao fechar o popup (Fase 4).
+- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 4/5).
 
 ---
 
@@ -139,11 +153,12 @@ Usuário cadastra suas próprias chaves de diferentes provedores de IA.
 - [x] `SummaryService` suporta Gemini, OpenAI e Anthropic
 - [x] `GET /api/me` retorna saldo gratuito restante (`Api::UsersController`)
 
-### Fase 3 — Chat Pós-Resumo
+### Fase 3 — Chat Pós-Resumo — CONCLUÍDA
 Após gerar o resumo, o usuário pode conversar sobre o conteúdo da página.
-- Mini chat integrado no popup da extensão.
-- O contexto da página é mantido como contexto da conversa.
-- Nova tabela `conversations` ou `messages` para persistir o histórico.
+- [x] `ChatService` com suporte a Gemini, OpenAI e Anthropic — histórico de conversa passado a cada chamada
+- [x] `Api::ChatController` com `POST /api/chat` — autenticado, usa mesma conexão do resumo
+- [x] UI de chat no popup — bolhas de mensagem, input, scroll automático
+- [x] Histórico em memória JS — cresce a cada troca, some ao fechar (Fase 4 persiste)
 
 ### Fase 4 — Persistência de Estado
 Fechar a extensão não perde o resumo nem o chat.

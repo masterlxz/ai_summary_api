@@ -66,8 +66,78 @@ async function loadConnectionSelect(token) {
   }
 }
 
+let chatHistory = [];
+let currentPageText = null;
+let currentConnectionId = null;
+
 document.getElementById('connectionsBtn').addEventListener('click', () => {
   window.location.href = 'connections.html';
+});
+
+function appendChatBubble(role, text) {
+  const messagesDiv = document.getElementById('chat-messages');
+  const bubble = document.createElement('div');
+  bubble.classList.add('chat-bubble', role);
+  bubble.textContent = text;
+  messagesDiv.appendChild(bubble);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSendBtn');
+  const message = input.value.trim();
+
+  if (!message || !currentPageText) return;
+
+  const { authToken } = await chrome.storage.local.get('authToken');
+  if (!authToken) { window.location.href = 'login.html'; return; }
+
+  appendChatBubble('user', message);
+  input.value = '';
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = '<span class="spinner"></span>';
+
+  const body = {
+    message,
+    page_context: currentPageText,
+    history: chatHistory
+  };
+  if (currentConnectionId) body.ai_connection_id = currentConnectionId;
+
+  try {
+    const response = await fetch('http://localhost:3000/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      appendChatBubble('assistant', `Erro: ${data.error || 'Falha ao processar mensagem.'}`);
+      return;
+    }
+
+    chatHistory.push({ role: 'user', content: message });
+    chatHistory.push({ role: 'assistant', content: data.reply });
+    appendChatBubble('assistant', data.reply);
+  } catch (error) {
+    appendChatBubble('assistant', 'Erro: Não consegui conectar ao servidor.');
+    console.error(error);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Enviar';
+  }
+}
+
+document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+
+document.getElementById('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendChatMessage();
 });
 
 document.getElementById('summarizeBtn').addEventListener('click', async () => {
@@ -93,6 +163,9 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
   });
 
   const selectedConnectionId = document.getElementById('connectionSelect').value;
+  currentPageText = result;
+  currentConnectionId = selectedConnectionId || null;
+
   const body = { text: result };
   if (selectedConnectionId) body.ai_connection_id = selectedConnectionId;
 
@@ -122,6 +195,10 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
 
     resultDiv.innerHTML = markdownToHtml(data.summary);
     resultDiv.style.display = 'block';
+
+    chatHistory = [];
+    document.getElementById('chat-messages').innerHTML = '';
+    document.getElementById('chat-section').style.display = 'block';
 
     if (data.free_summaries_remaining != null) {
       const select = document.getElementById('connectionSelect');

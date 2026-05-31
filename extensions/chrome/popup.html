@@ -55,6 +55,76 @@
     #result strong { color: #1e293b; }
     .error { color: #ef4444; font-weight: 500; }
 
+    #chat-section {
+      margin-top: 16px;
+      display: none;
+    }
+
+    #chat-section h4 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .chat-bubble {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 90%;
+    }
+
+    .chat-bubble.user {
+      background-color: #3b82f6;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .chat-bubble.assistant {
+      background-color: white;
+      color: #0f172a;
+      align-self: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    #chatInput {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #chatInput:focus { border-color: #3b82f6; }
+
+    #chatSendBtn {
+      width: auto;
+      padding: 9px 14px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
     select {
       width: 100%; padding: 9px 10px; margin-bottom: 10px;
       border: 1px solid #cbd5e1; border-radius: 8px;
@@ -86,6 +156,15 @@
     </select>
     <button id="summarizeBtn">Resumir Página Atual</button>
     <div id="result"></div>
+
+    <div id="chat-section">
+      <h4>💬 Perguntar sobre a página</h4>
+      <div id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Faça uma pergunta..." />
+        <button id="chatSendBtn">Enviar</button>
+      </div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
