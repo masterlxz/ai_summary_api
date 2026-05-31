@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Histórico — Resumo AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .container {
+      width: 340px;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      box-sizing: border-box;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    #backBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #64748b;
+      font-size: 18px;
+      line-height: 1;
+      border-radius: 4px;
+      width: auto;
+    }
+    #backBtn:hover { background-color: #e2e8f0; color: #0f172a; }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      color: #1e293b;
+      flex: 1;
+    }
+
+    #historyList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    .history-item:hover {
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .history-summary {
+      font-size: 13px;
+      color: #1e293b;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-url {
+      font-size: 11px;
+      color: #3b82f6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .history-date {
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      padding: 24px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button id="backBtn" title="Voltar">←</button>
+      <h2>Histórico de Resumos</h2>
+    </div>
+
+    <div id="historyList">
+      <p class="empty-state">Carregando...</p>
+    </div>
+  </div>
+
+  <script src="history.js"></script>
+</body>
+</html>

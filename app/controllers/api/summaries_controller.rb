@@ -31,6 +31,38 @@ class Api::SummariesController < ApplicationController
     end
   end
 
+  def index
+    summaries = current_user.summaries
+                             .order(created_at: :desc)
+                             .limit(15)
+                             .select(:id, :summary_text, :page_url, :created_at)
+
+    render json: { summaries: summaries.map { |s|
+      {
+        id:           s.id,
+        summary_text: s.summary_text.truncate(120),
+        page_url:     s.page_url,
+        created_at:   s.created_at
+      }
+    }}, status: :ok
+  end
+
+  def show
+    summary = current_user.summaries.find_by(id: params[:id])
+
+    if summary
+      render json: {
+        summary_id:       summary.id,
+        summary_text:     summary.summary_text,
+        page_context:     summary.page_context,
+        chat_history:     summary.chat_history,
+        ai_connection_id: summary.ai_connection_id
+      }, status: :ok
+    else
+      render json: { error: "Resumo não encontrado" }, status: :not_found
+    end
+  end
+
   def latest
     summary = current_user.summaries.order(created_at: :desc).first
 

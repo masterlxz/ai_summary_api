@@ -2,6 +2,8 @@ Rails.application.routes.draw do
     namespace :api do
         post 'summarize', to: 'summaries#create'
         get  'summaries/latest', to: 'summaries#latest'
+        get  'summaries',        to: 'summaries#index'
+        get  'summaries/:id',    to: 'summaries#show'
 
         post 'auth/google', to: 'auth#google'
 

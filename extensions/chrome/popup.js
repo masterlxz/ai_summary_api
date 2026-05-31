@@ -32,7 +32,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function restoreLastSession(token) {
   try {
-    const res = await fetch('http://localhost:3000/api/summaries/latest', {
+    const storage = await chrome.storage.local.get('restore_summary_id');
+    const restoreId = storage.restore_summary_id;
+
+    let url;
+    if (restoreId) {
+      url = `http://localhost:3000/api/summaries/${restoreId}`;
+      await chrome.storage.local.remove('restore_summary_id');
+    } else {
+      url = 'http://localhost:3000/api/summaries/latest';
+    }
+
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
@@ -104,6 +115,10 @@ let currentSummaryId = null;
 
 document.getElementById('connectionsBtn').addEventListener('click', () => {
   window.location.href = 'connections.html';
+});
+
+document.getElementById('historyBtn').addEventListener('click', () => {
+  window.location.href = 'history.html';
 });
 
 function appendChatBubble(role, text) {

@@ -140,9 +140,26 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 - Segurança: `current_user.summaries.find_by(id: summary_id)` — garante que um usuário nunca grava chat no resumo de outro.
 - `chat_history` com `default: []` no banco — evita `nil` no frontend ao restaurar uma sessão sem histórico de chat.
 
+### O que foi construído na sessão de 2026-05-31 (Fase 5 — Histórico de Resumos)
+
+**Backend:**
+- `SummariesController#index`: nova ação em `GET /api/summaries` — retorna os últimos 15 resumos do usuário com `id`, `summary_text` (truncado em 120 chars), `page_url` e `created_at`. Usa `.select()` para não carregar `page_context` (pesado).
+- `SummariesController#show`: nova ação em `GET /api/summaries/:id` — retorna o resumo completo (mesmo shape do `latest`). Busca via `current_user.summaries.find_by(id:)` por segurança.
+- `config/routes.rb`: adicionadas rotas `get 'summaries'` e `get 'summaries/:id'`, mantendo `summaries/latest` acima de `summaries/:id` para evitar conflito de roteamento.
+
+**Extensão:**
+- `history.html`: nova tela de histórico — cards com texto truncado, hostname da URL e data formatada. Mesmo estilo visual das outras telas.
+- `history.js`: faz `GET /api/summaries` ao abrir, renderiza os cards. Ao clicar num card, salva `restore_summary_id` no `chrome.storage.local` e navega de volta para `popup.html`.
+- `popup.html`: botão `🕐` adicionado à esquerda do header (espelhando o `⚙` da direita).
+- `popup.js`: `restoreLastSession` agora verifica `restore_summary_id` no storage ao abrir — se presente, faz `GET /api/summaries/:id` e limpa o storage; caso contrário, cai no fluxo normal de `latest`.
+
+**Decisões técnicas:**
+- `summaries/latest` antes de `summaries/:id` nas rotas — o Rails lê de cima para baixo; sem essa ordem, "latest" seria interpretado como ID.
+- `chrome.storage.local.remove('restore_summary_id')` logo após a leitura — evita que o popup continue carregando o resumo do histórico em abertura subsequentes.
+
 ### O que não funciona ainda
 
-- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 5).
+- Nada crítico pendente no core do produto. Próxima etapa é monetização (Fase 6).
 
 ---
 
@@ -183,9 +200,13 @@ Fechar a extensão não perde o resumo nem o chat.
 - [x] `ChatController` persiste cada turno no banco via `summary_id`
 - [x] Frontend restaura resumo + chat history automaticamente ao abrir
 
-### Fase 5 — Limite de Uso e Histórico
-- Lógica de limitação usando `free_summaries_count` e `last_summary_date` (já no schema).
-- Endpoint `GET /api/summaries` para histórico de resumos.
+### Fase 5 — Limite de Uso e Histórico — CONCLUÍDA
+- [x] Lógica de limitação com `free_summaries_count` e `last_summary_date` (implementada na Fase 2)
+- [x] `GET /api/summaries` — últimos 15 resumos do usuário
+- [x] `GET /api/summaries/:id` — resumo completo por ID
+- [x] Tela de histórico na extensão (`history.html` + `history.js`)
+- [x] Botão `🕐` no popup navega para o histórico
+- [x] Clicar num resumo do histórico restaura-o no popup via `restore_summary_id` no storage
 
 ### Fase 6 — Monetização (SaaS)
 - Planos Gratuito/Pro com Stripe.
