@@ -27,7 +27,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   await loadConnectionSelect(authToken);
+  await restoreLastSession(authToken);
 });
+
+async function restoreLastSession(token) {
+  try {
+    const res = await fetch('http://localhost:3000/api/summaries/latest', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+    if (!data.summary_text) return;
+
+    currentSummaryId = data.summary_id;
+    currentPageText  = data.page_context;
+    currentConnectionId = data.ai_connection_id || null;
+    chatHistory = data.chat_history || [];
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = markdownToHtml(data.summary_text);
+    resultDiv.style.display = 'block';
+
+    const messagesDiv = document.getElementById('chat-messages');
+    messagesDiv.innerHTML = '';
+    chatHistory.forEach(turn => appendChatBubble(turn.role, turn.content));
+
+    document.getElementById('chat-section').style.display = 'block';
+  } catch (error) {
+    console.error('Erro ao restaurar sessão:', error);
+  }
+}
 
 async function loadConnectionSelect(token) {
   const select = document.getElementById('connectionSelect');
@@ -69,6 +100,7 @@ async function loadConnectionSelect(token) {
 let chatHistory = [];
 let currentPageText = null;
 let currentConnectionId = null;
+let currentSummaryId = null;
 
 document.getElementById('connectionsBtn').addEventListener('click', () => {
   window.location.href = 'connections.html';
@@ -104,6 +136,7 @@ async function sendChatMessage() {
     history: chatHistory
   };
   if (currentConnectionId) body.ai_connection_id = currentConnectionId;
+  if (currentSummaryId)    body.summary_id = currentSummaryId;
 
   try {
     const response = await fetch('http://localhost:3000/api/chat', {
@@ -196,6 +229,7 @@ document.getElementById('summarizeBtn').addEventListener('click', async () => {
     resultDiv.innerHTML = markdownToHtml(data.summary);
     resultDiv.style.display = 'block';
 
+    currentSummaryId = data.summary_id || null;
     chatHistory = [];
     document.getElementById('chat-messages').innerHTML = '';
     document.getElementById('chat-section').style.display = 'block';

@@ -23,6 +23,7 @@ class Api::ChatController < ApplicationController
     reply = service.call
 
     if reply
+      persist_chat_turn(params[:summary_id], message, reply)
       render json: { reply: reply }, status: :ok
     else
       render json: { error: "Falha ao processar mensagem" }, status: :unprocessable_entity
@@ -30,6 +31,18 @@ class Api::ChatController < ApplicationController
   end
 
   private
+
+  def persist_chat_turn(summary_id, message, reply)
+    return unless summary_id.present?
+
+    summary = current_user.summaries.find_by(id: summary_id)
+    return unless summary
+
+    summary.update!(chat_history: summary.chat_history + [
+      { role: 'user',      content: message },
+      { role: 'assistant', content: reply   }
+    ])
+  end
 
   def resolve_credentials
     connection_id = params[:ai_connection_id]

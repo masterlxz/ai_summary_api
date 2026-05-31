@@ -3,6 +3,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :ai_connections
+  has_many :summaries
 
   def self.find_or_create_from_google(google_info)
     user = find_by(google_uid: google_info[:google_uid])

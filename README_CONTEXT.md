@@ -122,11 +122,27 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 - Gemini não tem campo `system` — contexto da página é injetado como o primeiro "turn" do array `contents`, com resposta simulada "Entendido" para satisfazer a API.
 - Chat não consome o limite gratuito de resumos — usa a mesma conexão selecionada sem cobrança adicional por mensagem.
 
+### O que foi construído na sessão de 2026-05-31 (Fase 4 — Persistência de Estado)
+
+**Backend:**
+- Migration `20260531203446`: criou tabela `summaries` com `user_id`, `summary_text`, `page_context`, `ai_connection_id`, `page_url`, `chat_history` (jsonb, default `[]`).
+- `app/models/summary.rb`: model com `belongs_to :user` e `belongs_to :ai_connection, optional: true`.
+- `User` model: adicionado `has_many :summaries`.
+- `SummariesController#create`: após gerar resumo, salva no banco e retorna `summary_id` no JSON.
+- `SummariesController#latest`: nova ação em `GET /api/summaries/latest` — retorna o último resumo do usuário com `summary_text`, `page_context`, `chat_history` e `ai_connection_id`.
+- `ChatController#create`: método privado `persist_chat_turn` — após cada resposta, appenda os dois novos turns (`user` + `assistant`) no `chat_history` do resumo correspondente.
+- `config/routes.rb`: adicionada rota `get 'summaries/latest'`.
+
+**Extensão:**
+- `popup.js`: variável global `currentSummaryId` adicionada. Função `restoreLastSession` chama `GET /api/summaries/latest` ao abrir o popup e restaura resumo + chat na UI. `summary_id` é passado nas requisições de chat para persistência no banco.
+
+**Decisões técnicas:**
+- Segurança: `current_user.summaries.find_by(id: summary_id)` — garante que um usuário nunca grava chat no resumo de outro.
+- `chat_history` com `default: []` no banco — evita `nil` no frontend ao restaurar uma sessão sem histórico de chat.
+
 ### O que não funciona ainda
 
-- Ao fechar e reabrir a extensão, o resumo some — estado não persiste (Fase 4).
-- Histórico de chat some ao fechar o popup (Fase 4).
-- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 4/5).
+- Histórico de resumos não existe ainda — usuário quer os últimos 10-15 salvos (Fase 5).
 
 ---
 
@@ -160,10 +176,12 @@ Após gerar o resumo, o usuário pode conversar sobre o conteúdo da página.
 - [x] UI de chat no popup — bolhas de mensagem, input, scroll automático
 - [x] Histórico em memória JS — cresce a cada troca, some ao fechar (Fase 4 persiste)
 
-### Fase 4 — Persistência de Estado
+### Fase 4 — Persistência de Estado — CONCLUÍDA
 Fechar a extensão não perde o resumo nem o chat.
-- Ao reabrir o popup: buscar último estado da sessão via GET autenticado.
-- Resumo e conversa salvos na conta do usuário.
+- [x] Tabela `summaries` com `chat_history` (jsonb)
+- [x] `GET /api/summaries/latest` restaura último estado ao abrir o popup
+- [x] `ChatController` persiste cada turno no banco via `summary_id`
+- [x] Frontend restaura resumo + chat history automaticamente ao abrir
 
 ### Fase 5 — Limite de Uso e Histórico
 - Lógica de limitação usando `free_summaries_count` e `last_summary_date` (já no schema).

@@ -12,16 +12,38 @@ class Api::SummariesController < ApplicationController
       return
     end
 
-    provider, api_key, free_remaining = resolve_credentials
+    provider, api_key, free_remaining, connection_id = resolve_credentials
     return if performed?
 
     service = SummaryService.new(texto_recebido, modo, provider: provider, api_key: api_key)
     resultado = service.call
 
     if resultado
-      render json: { summary: resultado, free_summaries_remaining: free_remaining }, status: :ok
+      summary = current_user.summaries.create!(
+        summary_text: resultado,
+        page_context: texto_recebido,
+        ai_connection_id: connection_id,
+        page_url: params[:page_url]
+      )
+      render json: { summary: resultado, summary_id: summary.id, free_summaries_remaining: free_remaining }, status: :ok
     else
       render json: { error: "Falha ao gerar resumo" }, status: :unprocessable_entity
+    end
+  end
+
+  def latest
+    summary = current_user.summaries.order(created_at: :desc).first
+
+    if summary
+      render json: {
+        summary_id:   summary.id,
+        summary_text: summary.summary_text,
+        page_context: summary.page_context,
+        chat_history: summary.chat_history,
+        ai_connection_id: summary.ai_connection_id
+      }, status: :ok
+    else
+      render json: { summary: nil }, status: :ok
     end
   end
 
@@ -33,7 +55,7 @@ class Api::SummariesController < ApplicationController
     if connection_id.present?
       connection = current_user.ai_connections.find_by(id: connection_id)
       return render(json: { error: "Conexão não encontrada" }, status: :not_found) unless connection
-      [connection.provider, connection.api_key, nil]
+      [connection.provider, connection.api_key, nil, connection.id]
     else
       check_free_limit
     end
@@ -52,6 +74,6 @@ class Api::SummariesController < ApplicationController
     end
 
     user.decrement!(:free_summaries_count)
-    ['gemini', ENV['GEMINI_API_KEY'], user.free_summaries_count]
+    ['gemini', ENV['GEMINI_API_KEY'], user.free_summaries_count, nil]
   end
 end
