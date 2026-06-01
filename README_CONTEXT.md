@@ -157,6 +157,22 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 - `summaries/latest` antes de `summaries/:id` nas rotas — o Rails lê de cima para baixo; sem essa ordem, "latest" seria interpretado como ID.
 - `chrome.storage.local.remove('restore_summary_id')` logo após a leitura — evita que o popup continue carregando o resumo do histórico em abertura subsequentes.
 
+### O que foi construído na sessão de 2026-06-01 (Logout + correção de bug)
+
+**Backend:**
+- `Api::AuthController#logout`: nova action — chama `authenticate_user!`, apaga o `auth_token` do banco (`update!(auth_token: nil)`), responde 200.
+- `config/routes.rb`: nova rota `delete 'auth/session', to: 'auth#logout'`.
+
+**Extensão:**
+- `popup.html`: botão 🚪 adicionado ao header à direita do ⚙. Hover vermelho (`#fee2e2 / #ef4444`).
+- `popup.js`: handler do `#logoutBtn` — faz `DELETE /api/auth/session`, limpa `authToken` e `userName` do `chrome.storage.local` e redireciona para `login.html`. O `.catch(() => {})` garante que o logout local acontece mesmo se o servidor estiver offline.
+
+**Bug corrigido:**
+- `history.js` linha 54 estava buscando `auth_token` (underscore) no storage, mas o token é salvo como `authToken` (camelCase). Resultado: histórico sempre redirecionava para login. Corrigido para `authToken`.
+
+**Setup em nova máquina:**
+- Ao clonar o projeto em uma nova máquina, rodar `bin/rails db:migrate` antes de subir o servidor. O Rails bloqueia todas as requisições enquanto houver migrations pendentes.
+
 ### O que não funciona ainda
 
 - Nada crítico pendente no core do produto. Próxima etapa é monetização (Fase 6).

@@ -121,6 +121,20 @@ document.getElementById('historyBtn').addEventListener('click', () => {
   window.location.href = 'history.html';
 });
 
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  const { authToken } = await chrome.storage.local.get('authToken');
+
+  if (authToken) {
+    await fetch('http://localhost:3000/api/auth/session', {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    }).catch(() => {});
+  }
+
+  await chrome.storage.local.remove(['authToken', 'userName']);
+  window.location.href = 'login.html';
+});
+
 function appendChatBubble(role, text) {
   const messagesDiv = document.getElementById('chat-messages');
   const bubble = document.createElement('div');

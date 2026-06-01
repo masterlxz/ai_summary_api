@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = 'popup.html';
   });
 
-  chrome.storage.local.get('auth_token', function(result) {
-    const token = result.auth_token;
+  chrome.storage.local.get('authToken', function(result) {
+    const token = result.authToken;
 
     if (!token) {
       window.location.href = 'login.html';

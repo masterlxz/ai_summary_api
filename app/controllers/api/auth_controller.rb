@@ -3,6 +3,14 @@ require 'uri'
 require 'json'
 
 class Api::AuthController < ApplicationController
+  def logout
+    authenticate_user!
+    return if performed?
+
+    current_user.update!(auth_token: nil)
+    render json: { message: "Logout realizado com sucesso" }, status: :ok
+  end
+
   def google
     code         = params[:code]
     code_verifier = params[:code_verifier]

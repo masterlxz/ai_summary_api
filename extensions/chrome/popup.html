@@ -27,11 +27,12 @@
     .header-center { flex: 1; text-align: center; }
     .header h2 { margin: 0; font-size: 18px; color: #1e293b; }
     #greeting { margin: 4px 0 0; font-size: 12px; color: #94a3b8; }
-    #connectionsBtn, #historyBtn {
+    #connectionsBtn, #historyBtn, #logoutBtn {
       background: none; border: none; cursor: pointer; font-size: 18px;
       color: #94a3b8; padding: 4px; border-radius: 4px; width: auto; line-height: 1;
     }
     #connectionsBtn:hover, #historyBtn:hover { background-color: #e2e8f0; color: #0f172a; }
+    #logoutBtn:hover { background-color: #fee2e2; color: #ef4444; }
 
     button {
       width: 100%; padding: 12px; background-color: #3b82f6; color: white;
@@ -151,6 +152,7 @@
         <p id="greeting"></p>
       </div>
       <button id="connectionsBtn" title="Gerenciar conexões AI">⚙</button>
+      <button id="logoutBtn" title="Sair">🚪</button>
     </div>
     <select id="connectionSelect">
       <option value="">⏳ Carregando conexões...</option>

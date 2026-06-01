@@ -5,7 +5,8 @@ Rails.application.routes.draw do
         get  'summaries',        to: 'summaries#index'
         get  'summaries/:id',    to: 'summaries#show'
 
-        post 'auth/google', to: 'auth#google'
+        post   'auth/google',   to: 'auth#google'
+        delete 'auth/session',  to: 'auth#logout'
 
         resources :ai_connections, only: [:index, :create, :update, :destroy]
 
