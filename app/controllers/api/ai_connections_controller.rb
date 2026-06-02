@@ -2,7 +2,7 @@ class Api::AiConnectionsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    connections = current_user.ai_connections
+    connections = current_user.ai_connections.select(:id, :name, :provider)
     render json: connections, status: :ok
   end
 

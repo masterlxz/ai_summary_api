@@ -40,7 +40,8 @@ class Api::AuthController < ApplicationController
 
     render json: { token: user.auth_token, name: user.name }, status: :ok
   rescue StandardError => e
-    render json: { error: "Erro ao autenticar: #{e.message}" }, status: :internal_server_error
+    Rails.logger.error("Auth error: #{e.class} — #{e.message}")
+    render json: { error: "Falha na autenticação" }, status: :internal_server_error
   end
 
   private
