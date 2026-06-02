@@ -173,9 +173,21 @@ O fluxo completo de autenticação Google OAuth com PKCE está funcionando.
 **Setup em nova máquina:**
 - Ao clonar o projeto em uma nova máquina, rodar `bin/rails db:migrate` antes de subir o servidor. O Rails bloqueia todas as requisições enquanto houver migrations pendentes.
 
-### O que não funciona ainda
+### O que foi construído na sessão de 2026-06-01 (Security Review)
 
-- Nada crítico pendente no core do produto. Próxima etapa é monetização (Fase 6).
+**Backend:**
+- `ai_connections_controller.rb`: `index` passou a usar `.select(:id, :name, :provider)` — `api_key` não é mais retornada pela API, evitando exposição desnecessária em trânsito.
+- `auth_controller.rb`: `e.message` removido da resposta de erro do Google auth — detalhe da exceção vai só para o log do servidor (`Rails.logger.error`), cliente recebe mensagem genérica.
+- `cors.rb`: `origins '*'` substituído por `ENV.fetch('ALLOWED_ORIGIN', '*')` — em produção, basta definir a variável de ambiente com o domínio real; em desenvolvimento continua funcionando sem configuração adicional.
+
+### Status atual do projeto
+
+**Projeto pausado em 2026-06-01.** O core do produto está completo e funcional. A decisão de pausar foi tomada após avaliar que a Fase 6 (monetização via Stripe) tem burocracia incompatível com o momento atual.
+
+**Ideias para retomada futura:**
+- Transformar em extensão 100% local usando [Ollama](https://ollama.com) (modelos locais como `gemma3` ou `llama3.2`) — zero custo, zero API key, zero servidor, funciona offline
+- Alternativamente, BYOK puro: extensão chama a API de IA diretamente (sem backend Rails), usuário coloca a própria chave, tudo salvo em `chrome.storage.local`
+- Monetização via Hotmart/Kiwify (Brasil) ou Ko-fi como alternativa ao Stripe quando/se aplicável
 
 ---
 
@@ -224,9 +236,9 @@ Fechar a extensão não perde o resumo nem o chat.
 - [x] Botão `🕐` no popup navega para o histórico
 - [x] Clicar num resumo do histórico restaura-o no popup via `restore_summary_id` no storage
 
-### Fase 6 — Monetização (SaaS)
-- Planos Gratuito/Pro com Stripe.
-- Landing page do produto.
+### Fase 6 — Monetização (SaaS) — PAUSADA
+- Descartada por ora: Stripe exige burocracia (verificação de identidade, conta bancária) incompatível com o momento.
+- Alternativas futuras: Hotmart/Kiwify (BR), Ko-fi, ou Pix manual para validar interesse antes de automatizar.
 
 ---
 
